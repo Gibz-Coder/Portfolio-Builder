@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Models\User;
 
 class LoginRequest extends FormRequest
 {
@@ -46,6 +47,15 @@ class LoginRequest extends FormRequest
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
+            ]);
+        }
+
+        // Check if user is approved by admin
+        $user = User::where('email', $this->email)->first();
+        if ($user && !$user->isApproved() && !$user->isAdmin()) {
+            Auth::logout();
+            throw ValidationException::withMessages([
+                'email' => 'Your account is pending admin approval. Please wait for an administrator to approve your account.',
             ]);
         }
 

@@ -34,7 +34,9 @@ class UserController extends Controller
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
-        $validated['email_verified_at'] = now();
+        // Auto-approve admin-created users
+        $validated['admin_approved'] = true;
+        $validated['admin_approved_at'] = now();
 
         User::create($validated);
 
@@ -99,5 +101,44 @@ class UserController extends Controller
 
         $status = $user->is_active ? 'activated' : 'deactivated';
         return back()->with('success', "User {$status} successfully!");
+    }
+
+    public function approve(User $user)
+    {
+        // Only allow approving non-admin users who are not already approved
+        if ($user->isAdmin()) {
+            return back()->with('error', 'Admin users are automatically approved!');
+        }
+
+        if ($user->isApproved()) {
+            return back()->with('info', 'User is already approved!');
+        }
+
+        $user->update([
+            'admin_approved' => true,
+            'admin_approved_at' => now(),
+        ]);
+
+        return back()->with('success', 'User approved successfully!');
+    }
+
+    public function unapprove(User $user)
+    {
+        // Only allow unapproving non-admin users
+        if ($user->isAdmin()) {
+            return back()->with('error', 'Admin users cannot be unapproved!');
+        }
+
+        // Prevent admin from unapproving themselves
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'You cannot unapprove your own account!');
+        }
+
+        $user->update([
+            'admin_approved' => false,
+            'admin_approved_at' => null,
+        ]);
+
+        return back()->with('success', 'User approval revoked successfully!');
     }
 }

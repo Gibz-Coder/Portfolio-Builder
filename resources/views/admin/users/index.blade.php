@@ -19,6 +19,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approval</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
@@ -35,6 +36,7 @@
                                                 <span class="text-white font-semibold text-sm">{{ substr($user->name, 0, 1) }}</span>
                                             </div>
                                         @endif
+                                        
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900">{{ $user->name }}</div>
                                             <div class="text-sm text-gray-500">{{ $user->email }}</div>
@@ -58,22 +60,63 @@
                                         {{ $user->is_active ? 'Active' : 'Inactive' }}
                                     </span>
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @if($user->isAdmin())
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                            <i class="fas fa-crown mr-1"></i>Auto-Approved
+                                        </span>
+                                    @elseif($user->isApproved())
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <i class="fas fa-check-circle mr-1"></i>Approved
+                                        </span>
+                                        @if($user->admin_approved_at)
+                                            <div class="text-xs text-gray-400 mt-1">{{ $user->admin_approved_at->format('M j, Y') }}</div>
+                                        @endif
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <i class="fas fa-clock mr-1"></i>Pending
+                                        </span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ $user->created_at->format('M j, Y') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center space-x-2">
-                                        <a href="{{ route('admin.users.show', $user) }}" class="text-blue-600 hover:text-blue-900">
+                                        <a href="{{ route('admin.users.show', $user) }}" class="text-blue-600 hover:text-blue-900" title="View User">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('admin.users.edit', $user) }}" class="text-indigo-600 hover:text-indigo-900">
+                                        <a href="{{ route('admin.users.edit', $user) }}" class="text-indigo-600 hover:text-indigo-900" title="Edit User">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a href="{{ route('portfolio.show', $user) }}" target="_blank" class="text-green-600 hover:text-green-900">
+                                        <a href="{{ route('portfolio.show', $user) }}" target="_blank" class="text-green-600 hover:text-green-900" title="View Portfolio">
                                             <i class="fas fa-external-link-alt"></i>
                                         </a>
                                         
                                         @if($user->id !== auth()->id())
+                                            <!-- Approval Actions for non-admin users -->
+                                            @if(!$user->isAdmin())
+                                                @if($user->isApproved())
+                                                    <form method="POST" action="{{ route('admin.users.unapprove', $user) }}" class="inline">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="text-orange-600 hover:text-orange-900" title="Revoke Approval" 
+                                                                onclick="return confirm('Are you sure you want to revoke approval for this user?')">
+                                                            <i class="fas fa-user-minus"></i>
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <form method="POST" action="{{ route('admin.users.approve', $user) }}" class="inline">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="text-green-600 hover:text-green-900" title="Approve User">
+                                                            <i class="fas fa-user-check"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            @endif
+
+                                            <!-- Status Toggle -->
                                             <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}" class="inline">
                                                 @csrf
                                                 @method('PATCH')
@@ -82,10 +125,11 @@
                                                 </button>
                                             </form>
                                             
+                                            <!-- Delete User -->
                                             <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900">
+                                                <button type="submit" class="text-red-600 hover:text-red-900" title="Delete User">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>

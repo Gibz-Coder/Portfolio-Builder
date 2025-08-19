@@ -38,27 +38,59 @@
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-20px); }
         }
+
+        /* Mobile navigation improvements */
+        @media (max-width: 768px) {
+            .mobile-nav-menu {
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            }
+
+            /* Ensure proper spacing for mobile logo */
+            .mobile-logo h1 {
+                font-size: 1.125rem;
+                line-height: 1.75rem;
+            }
+
+            /* Mobile menu button improvements */
+            .mobile-menu-btn {
+                padding: 0.5rem;
+                border-radius: 0.375rem;
+            }
+
+            /* Prevent text overflow on small screens */
+            .mobile-nav-item {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        /* Ensure navigation doesn't interfere with content */
+        .nav-spacer {
+            height: 4rem; /* 64px - same as nav height */
+        }
     </style>
 </head>
 <body class="font-sans antialiased">
     <!-- Navigation -->
-    <nav class="bg-white/95 backdrop-blur-sm shadow-lg fixed w-full z-50 border-b border-gray-100">
+    <nav x-data="{ open: false }" class="bg-white/95 backdrop-blur-sm shadow-lg fixed w-full z-50 border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center mr-3">
-                                <i class="fas fa-briefcase text-white text-lg"></i>
+                        <div class="flex items-center mobile-logo">
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center mr-2 sm:mr-3">
+                                <i class="fas fa-briefcase text-white text-sm sm:text-lg"></i>
                             </div>
-                            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            <h1 class="text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                                 Portfolio Builder
                             </h1>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-4">
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-4">
                     @if (Route::has('login'))
                         @auth
                             <a href="{{ url('/dashboard') }}" class="text-gray-700 hover:text-blue-600 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:bg-blue-50">
@@ -76,6 +108,38 @@
                         @endauth
                     @endif
                 </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button @click="open = ! open" class="mobile-menu-btn inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div :class="{'block': open, 'hidden': ! open}" class="hidden md:hidden mobile-nav-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
+                @if (Route::has('login'))
+                    @auth
+                        <a href="{{ url('/dashboard') }}" @click="open = false" class="mobile-nav-item block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200">
+                            <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" @click="open = false" class="mobile-nav-item block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+                        </a>
+                        @if (Route::has('register'))
+                            <a href="{{ route('register') }}" @click="open = false" class="mobile-nav-item block px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-md">
+                                <i class="fas fa-rocket mr-2"></i>Get Started
+                            </a>
+                        @endif
+                    @endauth
+                @endif
             </div>
         </div>
     </nav>

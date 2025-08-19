@@ -15,8 +15,22 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <!-- Alpine.js CDN fallback -->
+    <script>
+        // Check if Alpine.js loaded from Vite, if not load from CDN
+        setTimeout(() => {
+            if (typeof window.Alpine === 'undefined') {
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js';
+                script.defer = true;
+                document.head.appendChild(script);
+            }
+        }, 1000);
+    </script>
+
     <style>
         body { font-family: 'Inter', sans-serif; }
+        [x-cloak] { display: none !important; }
     </style>
 </head>
 <body class="font-sans antialiased bg-gray-50">
@@ -90,37 +104,72 @@
 
         // Ensure Alpine.js is ready and fix navigation responsiveness
         document.addEventListener('alpine:init', () => {
-            console.log('Alpine.js initialized');
+            // Alpine.js initialized
         });
 
-        // Fix potential CSS transition interference with clicks and optimize navigation
+        // Remove conflicting dropdown functionality - let Alpine.js handle it
+
+        // Ensure proper pointer events for interactive elements
         document.addEventListener('DOMContentLoaded', function() {
-            // Remove any CSS transitions that might interfere with navigation
             const style = document.createElement('style');
             style.textContent = `
-                .transition-all, .transition-colors, .transition-transform {
-                    pointer-events: auto !important;
-                }
-                a, button {
+                button, a, [role="button"] {
                     pointer-events: auto !important;
                 }
             `;
             document.head.appendChild(style);
 
-            // Optimize navigation links for immediate response
-            const navLinks = document.querySelectorAll('a[href^="/"]');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    // Add visual feedback immediately
-                    this.style.opacity = '0.7';
-
-                    // Restore opacity after a short delay
-                    setTimeout(() => {
-                        this.style.opacity = '';
-                    }, 150);
-                });
-            });
+            // Fallback dropdown functionality if Alpine.js fails
+            setTimeout(() => {
+                if (typeof window.Alpine === 'undefined') {
+                    initFallbackDropdown();
+                }
+            }, 1000);
         });
+
+        function initFallbackDropdown() {
+            const dropdownContainer = document.querySelector('[x-data*="open"]');
+            const dropdownButton = dropdownContainer?.querySelector('button');
+            const dropdownMenu = dropdownContainer?.querySelector('[x-show="open"]');
+
+            if (dropdownButton && dropdownMenu) {
+                let isOpen = false;
+
+                dropdownButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    isOpen = !isOpen;
+
+                    if (isOpen) {
+                        dropdownMenu.style.display = 'block';
+                        dropdownButton.setAttribute('aria-expanded', 'true');
+                    } else {
+                        dropdownMenu.style.display = 'none';
+                        dropdownButton.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!dropdownContainer.contains(e.target)) {
+                        isOpen = false;
+                        dropdownMenu.style.display = 'none';
+                        dropdownButton.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                // Close dropdown when clicking menu items
+                const menuItems = dropdownMenu.querySelectorAll('a, button');
+                menuItems.forEach(item => {
+                    item.addEventListener('click', function() {
+                        isOpen = false;
+                        dropdownMenu.style.display = 'none';
+                        dropdownButton.setAttribute('aria-expanded', 'false');
+                    });
+                });
+            }
+        }
     </script>
 </body>
 </html>

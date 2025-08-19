@@ -209,26 +209,7 @@
             </div>
         </form>
 
-        <!-- Delete Form (Separate from Update Form) -->
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-            <div class="bg-red-50 border border-red-200 rounded-lg p-6">
-                <h3 class="text-lg font-semibold text-red-800 mb-2">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>Danger Zone
-                </h3>
-                <p class="text-sm text-red-600 mb-4">
-                    Once you delete this service, it will be permanently removed from your portfolio.
-                </p>
-                <form action="{{ route('services.destroy', $service) }}" method="POST" class="inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                            onclick="return confirm('Are you sure you want to delete this service? This action cannot be undone.')"
-                            class="inline-flex items-center px-6 py-3 bg-red-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200">
-                        <i class="fas fa-trash mr-2"></i>Delete Service
-                    </button>
-                </form>
-            </div>
-        </div>
+
     </div>
 
     <script>

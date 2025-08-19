@@ -22,12 +22,17 @@ Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/portfolio/{user}', [LandingController::class, 'portfolio'])->name('portfolio.show');
 Route::post('/contact/{user}', [MessageController::class, 'store'])->name('contact.store');
 
-// Dashboard
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])->name('dashboard');
+// Registration pending page
+Route::get('/registration-pending', function () {
+    return view('auth.registration-pending');
+})->name('registration.pending');
 
-// Authenticated user routes
-Route::middleware('auth')->group(function () {
+// Dashboard - requires authentication and admin approval (not email verification)
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'approved'])->name('dashboard');
+
+// Authenticated user routes - requires admin approval (not email verification)
+Route::middleware(['auth', 'approved'])->group(function () {
     // Breeze profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -48,11 +53,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/messages/{message}/mark-read', [MessageController::class, 'markAsRead'])->name('messages.mark-read');
 });
 
-// Admin routes
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+// Admin routes - requires authentication and admin approval (not email verification) and admin role
+Route::middleware(['auth', 'approved', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::resource('users', UserController::class);
     Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+    Route::patch('/users/{user}/approve', [UserController::class, 'approve'])->name('users.approve');
+    Route::patch('/users/{user}/unapprove', [UserController::class, 'unapprove'])->name('users.unapprove');
 });
 
 require __DIR__.'/auth.php';

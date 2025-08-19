@@ -246,28 +246,18 @@
             </div>
 
             <!-- Submit Buttons -->
-            <div class="flex justify-between">
-                <form action="{{ route('portfolio-profile.destroy', $portfolioProfile) }}" method="POST" class="inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" 
-                            onclick="return confirm('Are you sure you want to delete this profile? This action cannot be undone.')"
-                            class="inline-flex items-center px-6 py-3 bg-red-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200">
-                        <i class="fas fa-trash mr-2"></i>Delete Profile
-                    </button>
-                </form>
-
-                <div class="flex space-x-4">
-                    <a href="{{ route('portfolio-profile.index') }}" 
-                       class="inline-flex items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
-                        Cancel
-                    </a>
-                    <button type="submit" 
-                            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 shadow-lg transform hover:-translate-y-0.5">
-                        <i class="fas fa-save mr-2"></i>Update Profile
-                    </button>
-                </div>
+            <div class="flex justify-end space-x-4">
+                <a href="{{ route('portfolio-profile.index') }}"
+                   class="inline-flex items-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 shadow-lg transform hover:-translate-y-0.5">
+                    <i class="fas fa-save mr-2"></i>Update Profile
+                </button>
             </div>
         </form>
+
+
     </div>
 </x-app-layout>

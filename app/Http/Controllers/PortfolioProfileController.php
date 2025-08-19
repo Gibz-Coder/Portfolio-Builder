@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Profile;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Storage;
 
 class PortfolioProfileController extends Controller
 {
@@ -76,14 +77,24 @@ class PortfolioProfileController extends Controller
             'about_me' => 'nullable|string',
         ]);
 
+        // Handle file uploads
         if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($portfolioProfile->avatar) {
+                Storage::disk('public')->delete($portfolioProfile->avatar);
+            }
             $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
         }
 
         if ($request->hasFile('resume')) {
+            // Delete old resume if exists
+            if ($portfolioProfile->resume) {
+                Storage::disk('public')->delete($portfolioProfile->resume);
+            }
             $validated['resume'] = $request->file('resume')->store('resumes', 'public');
         }
 
+        // Update the profile
         $portfolioProfile->update($validated);
 
         return redirect()->route('portfolio-profile.index')

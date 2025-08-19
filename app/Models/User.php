@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -23,6 +22,8 @@ class User extends Authenticatable
         'password',
         'role',
         'is_active',
+        'admin_approved',
+        'admin_approved_at',
     ];
 
     /**
@@ -46,12 +47,24 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'admin_approved' => 'boolean',
+            'admin_approved_at' => 'datetime',
         ];
     }
 
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->admin_approved === true;
+    }
+
+    public function isPending(): bool
+    {
+        return $this->admin_approved === false;
     }
 
     public function profile()

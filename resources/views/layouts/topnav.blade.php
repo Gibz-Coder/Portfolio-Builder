@@ -34,9 +34,12 @@
                 </div>
 
                 <!-- Profile dropdown -->
-                <div class="relative" x-data="{ open: false }" @click.away="open = false">
-                    <button @click.stop="open = !open"
-                            class="flex items-center space-x-3 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                <div class="relative" id="profile-dropdown">
+                    <button id="profile-dropdown-button"
+                            type="button"
+                            class="flex items-center space-x-3 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+                            aria-expanded="false"
+                            aria-haspopup="true">
                         @if(auth()->user()->avatar_url)
                             <img src="{{ auth()->user()->avatar_url }}"
                                  alt="{{ auth()->user()->name }}"
@@ -56,14 +59,9 @@
                     </button>
 
                     <!-- Dropdown menu -->
-                    <div x-show="open"
-                         x-transition:enter="transition ease-out duration-100"
-                         x-transition:enter-start="transform opacity-0 scale-95"
-                         x-transition:enter-end="transform opacity-100 scale-100"
-                         x-transition:leave="transition ease-in duration-75"
-                         x-transition:leave-start="transform opacity-100 scale-100"
-                         x-transition:leave-end="transform opacity-0 scale-95"
-                         class="absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                    <div id="profile-dropdown-menu"
+                         class="absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 transition-all duration-100 transform opacity-0 scale-95 pointer-events-none"
+                         style="display: none;">
                         <div class="py-1">
                             <!-- Profile Section -->
                             <div class="px-4 py-3 border-b border-gray-100">
@@ -87,21 +85,21 @@
                             </div>
 
                             <!-- Menu Items -->
-                            <a href="{{ route('profile.edit') }}" 
-                               class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out">
+                            <a href="{{ route('profile.edit') }}"
+                               class="dropdown-item flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out">
                                 <i class="fas fa-user-cog mr-3 text-gray-400"></i>
                                 Account Settings
                             </a>
-                            
+
                             <a href="{{ route('portfolio.show', auth()->user()) }}" target="_blank"
-                               class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out">
+                               class="dropdown-item flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out">
                                 <i class="fas fa-external-link-alt mr-3 text-gray-400"></i>
                                 View Portfolio
                             </a>
 
                             @if(auth()->user()->isAdmin())
-                                <a href="{{ route('admin.users.index') }}" 
-                                   class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out">
+                                <a href="{{ route('admin.users.index') }}"
+                                   class="dropdown-item flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition duration-150 ease-in-out">
                                     <i class="fas fa-users-cog mr-3 text-gray-400"></i>
                                     Admin Panel
                                 </a>
@@ -112,8 +110,8 @@
                             <!-- Logout -->
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" 
-                                        class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition duration-150 ease-in-out">
+                                <button type="submit"
+                                        class="dropdown-item flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition duration-150 ease-in-out">
                                     <i class="fas fa-sign-out-alt mr-3 text-red-400"></i>
                                     Sign Out
                                 </button>
@@ -132,8 +130,76 @@
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <i class="fas fa-search text-gray-400"></i>
         </div>
-        <input type="text" 
-               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" 
+        <input type="text"
+               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                placeholder="Search portfolio content...">
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdownButton = document.getElementById('profile-dropdown-button');
+    const dropdownMenu = document.getElementById('profile-dropdown-menu');
+    const dropdown = document.getElementById('profile-dropdown');
+    let isOpen = false;
+
+    if (dropdownButton && dropdownMenu) {
+        // Toggle dropdown on button click
+        dropdownButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            isOpen = !isOpen;
+
+            if (isOpen) {
+                dropdownMenu.style.display = 'block';
+                setTimeout(() => {
+                    dropdownMenu.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+                    dropdownMenu.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
+                }, 10);
+                dropdownButton.setAttribute('aria-expanded', 'true');
+                dropdownButton.classList.add('ring-2', 'ring-blue-500');
+            } else {
+                dropdownMenu.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+                dropdownMenu.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+                setTimeout(() => {
+                    dropdownMenu.style.display = 'none';
+                }, 100);
+                dropdownButton.setAttribute('aria-expanded', 'false');
+                dropdownButton.classList.remove('ring-2', 'ring-blue-500');
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target)) {
+                if (isOpen) {
+                    isOpen = false;
+                    dropdownMenu.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+                    dropdownMenu.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+                    setTimeout(() => {
+                        dropdownMenu.style.display = 'none';
+                    }, 100);
+                    dropdownButton.setAttribute('aria-expanded', 'false');
+                    dropdownButton.classList.remove('ring-2', 'ring-blue-500');
+                }
+            }
+        });
+
+        // Close dropdown when clicking menu items
+        const menuItems = dropdownMenu.querySelectorAll('.dropdown-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                isOpen = false;
+                dropdownMenu.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+                dropdownMenu.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+                setTimeout(() => {
+                    dropdownMenu.style.display = 'none';
+                }, 100);
+                dropdownButton.setAttribute('aria-expanded', 'false');
+                dropdownButton.classList.remove('ring-2', 'ring-blue-500');
+            });
+        });
+    }
+});
+</script>

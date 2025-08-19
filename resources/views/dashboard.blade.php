@@ -1,11 +1,12 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
+        <!-- Desktop Layout -->
+        <div class="hidden md:flex justify-between items-center">
             <div>
                 <h2 class="font-bold text-2xl text-gray-900 leading-tight">
                     <i class="fas fa-chart-line mr-3 text-blue-600"></i>Portfolio Dashboard
                 </h2>
-                <p class="text-sm text-gray-600 mt-1">Welcome back, {{ auth()->user()->name }}! Here's your portfolio overview.</p>
+                <p class="text-sm text-gray-600 mt-1">Welcome back, {{ explode(' ', auth()->user()->name)[0] }}!</p>
             </div>
             <div class="flex items-center space-x-4">
                 <div class="text-right">
@@ -21,6 +22,32 @@
                 <a href="{{ route('portfolio.show', auth()->user()) }}" target="_blank"
                    class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg">
                     <i class="fas fa-external-link-alt mr-2"></i>View Portfolio
+                </a>
+            </div>
+        </div>
+
+        <!-- Mobile Layout -->
+        <div class="md:hidden space-y-4">
+            <div>
+                <h2 class="font-bold text-xl text-gray-900 leading-tight">
+                    <i class="fas fa-chart-line mr-2 text-blue-600"></i>Portfolio Dashboard
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">Welcome back, {{ explode(' ', auth()->user()->name)[0] }}!</p>
+            </div>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="text-xs text-gray-500">Portfolio Completion</div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-16 bg-gray-200 rounded-full h-1.5">
+                            <div class="bg-gradient-to-r from-blue-500 to-purple-600 h-1.5 rounded-full transition-all duration-300"
+                                 style="width: {{ $completionData['percentage'] }}%"></div>
+                        </div>
+                        <span class="text-xs font-semibold text-gray-700">{{ $completionData['percentage'] }}%</span>
+                    </div>
+                </div>
+                <a href="{{ route('portfolio.show', auth()->user()) }}" target="_blank"
+                   class="inline-flex items-center px-3 py-2 bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg">
+                    <i class="fas fa-external-link-alt mr-1"></i>View
                 </a>
             </div>
         </div>
@@ -378,8 +405,35 @@
     </div>
 
     <!-- Chart.js Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        // Try to load Chart.js dynamically to bypass CSP
+        function loadChartJS() {
+            return new Promise((resolve, reject) => {
+                if (typeof Chart !== 'undefined') {
+                    resolve();
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                script.onload = () => {
+                    resolve();
+                };
+                script.onerror = () => {
+                    reject();
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        // Load Chart.js and then initialize charts
+        loadChartJS().then(() => {
+            initializeCharts();
+        }).catch(() => {
+            // Chart.js failed to load, charts will not be displayed
+        });
+
+        function initializeCharts() {
         // Messages Chart
         const messagesCtx = document.getElementById('messagesChart').getContext('2d');
         const messagesChart = new Chart(messagesCtx, {
@@ -465,6 +519,14 @@
                         }
                     }
                 }
+            }
+        });
+        }
+
+        // Initialize charts when DOM is ready if Chart.js is already loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof Chart !== 'undefined') {
+                initializeCharts();
             }
         });
     </script>

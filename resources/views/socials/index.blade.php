@@ -45,7 +45,7 @@
                             
                             <h3 class="text-xl font-bold text-gray-900 mb-2 capitalize">{{ $social->platform }}</h3>
                             @if($social->username)
-                                <p class="text-gray-600 text-sm mb-2">@{{ $social->username }}</p>
+                                <p class="text-gray-600 text-sm mb-2">{{ $social->username }}</p>
                             @endif
                         </div>
 

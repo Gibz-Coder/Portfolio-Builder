@@ -13,11 +13,13 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'approved' => \App\Http\Middleware\EnsureUserIsApproved::class,
         ]);
 
         // Add the eager loading middleware to the web group
         $middleware->web(append: [
             \App\Http\Middleware\EagerLoadUserProfile::class,
+            // CSP is now handled by Nginx configuration
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
